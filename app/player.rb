@@ -2,7 +2,10 @@
 
 # === Player ===
 class Player
-  def initialize(name)
+  attr_reader :bank, :name
+
+  def initialize(name, is_dealer)
+    @is_dealer = is_dealer
     @bank = 100
     @name = name
   end
