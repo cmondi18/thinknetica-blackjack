@@ -28,7 +28,7 @@ class Deck
   end
 
   def card
-    card = @@cards.keys[rand(@@cards.size)]
+    card = @@cards.slice(@@cards.keys[rand(@@cards.size)])
     @@cards.delete(card)
     card
   end
