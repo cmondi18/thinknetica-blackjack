@@ -13,9 +13,12 @@ class Player
   end
 
   def take_card(deck)
+    if @current_hand.size == 3 && !@is_dealer
+      puts 'You have 3 cards and can\'t get another one'
+      return
+    end
     card = deck.card
     @current_hand = @current_hand.merge(card)
-    card
     if @is_dealer
       puts 'Dealer received card [?]'
     else
@@ -43,10 +46,19 @@ class Player
     end
   end
 
+  def full_hand?
+    return true if current_hand.size == 3
+
+    false
+  end
+
+  def clear_hand
+    @current_hand = {}
+  end
+
   private
 
   def check_ace(sum, ace_values)
-    puts 'You got ACE!'
     return ace_values.max if sum + ace_values[0] <= 21 && sum + ace_values[1] <= 21
     return ace_values[0] if sum + ace_values[0] <= 21 && sum + ace_values[1] > 21
     return ace_values[1] if sum + ace_values[0] > 21 && sum + ace_values[1] <= 21
