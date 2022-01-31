@@ -4,6 +4,7 @@ require_relative 'deck'
 
 # === Game ===
 class Game
+  MIN_DECK_SIZE = 20
   BET_VALUE = 10
   @@bank = 0 # TODO: Not sure that really need this var
 
@@ -16,6 +17,9 @@ class Game
     deck = Deck.new
     loop do
       puts "*** \nPlayer bank: #{player.bank}$, Dealer bank: #{dealer.bank}$ \n***"
+      continue(player)
+      deck = refresh_deck(deck)
+      deck.cards
       player.first_take(deck)
       dealer.first_take(deck)
       get_bets(player, dealer)
@@ -90,7 +94,7 @@ class Game
       player.clear_hand
       dealer.clear_hand
       puts 'It is draw'
-    elsif (player.current_hand_points > dealer.current_hand_points) || (player.current_hand_points <= 21 && dealer.current_hand_points > 21)
+    elsif ((player.current_hand_points > dealer.current_hand_points) && player.current_hand_points <= 21) || (player.current_hand_points <= 21 && dealer.current_hand_points > 21)
       player.bank += @@bank
       @@bank = 0
       player.clear_hand
@@ -102,6 +106,26 @@ class Game
       player.clear_hand
       dealer.clear_hand
       puts 'You lost :('
+    end
+  end
+
+  def continue(player)
+    puts "#{player.name}, do you want to continue? Press '1' if yes, another button if no"
+    choice = gets.chomp.to_i
+    if choice == 1
+      return
+    else
+      puts 'Thanks for game, goodbye'
+      exit
+    end
+  end
+
+  def refresh_deck(deck)
+    if deck.cards.size < MIN_DECK_SIZE
+      puts 'Deck was refreshed'
+      Deck.new
+    else
+      deck
     end
   end
 end

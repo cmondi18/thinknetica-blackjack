@@ -3,6 +3,8 @@
 # === Deck ===
 # TODO: Do we need to reset deck when cards are finished or reset it each game?
 class Deck
+  attr_reader :cards
+
   HIGHER_CARDS = {
     king: 10,
     queen: 10,
