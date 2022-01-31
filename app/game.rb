@@ -61,7 +61,7 @@ class Game
     when 1
       dealer_turn(player, dealer, deck)
     when 2
-      player.take_card(deck)
+      player.hand.take_card(deck, player)
       dealer_turn(player, dealer, deck)
     when 3
       winner(player, dealer)
@@ -72,7 +72,7 @@ class Game
   end
 
   def dealer_turn(player, dealer, deck)
-    dealer.take_card(deck) if dealer.hand.points < 17 && !dealer.hand.full?
+    dealer.hand.take_card(deck, dealer) if dealer.hand.points < 17 && !dealer.hand.full?
     player_turn(player, dealer, deck)
   end
 
