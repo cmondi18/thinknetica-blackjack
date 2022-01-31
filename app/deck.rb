@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'card'
 # === Deck ===
-# TODO: Do we need to reset deck when cards are finished or reset it each game?
 class Deck
   attr_reader :cards
 
@@ -15,21 +15,21 @@ class Deck
   SUITS = %W[\u2664 \u2661 \u2667 \u2662].freeze
 
   def initialize
-    @cards = {}
+    @cards = []
 
     SUITS.each do |suit|
       HIGHER_CARDS.each do |card|
-        @cards[card[0].to_s + suit] = card[1]
+        @cards << Card.new(card[0].to_s + suit, card[1])
       end
       (2..10).each do |card|
-        @cards[card.to_s + suit] = card
+        @cards << Card.new(card.to_s + suit, card)
       end
     end
   end
 
   def card
-    card = @cards.slice(@cards.keys[rand(@cards.size)])
-    @cards.delete(card.keys[0])
+    card = @cards.sample
+    @cards.delete(card)
     card
   end
 end

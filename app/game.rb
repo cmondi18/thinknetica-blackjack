@@ -8,7 +8,6 @@ require_relative 'interface'
 class Game
   MIN_DECK_SIZE = 20
   BET_VALUE = 10
-  @@bank = 0 # TODO: Not sure that really need this var
 
   def initialize
     @bank = 0
@@ -46,11 +45,11 @@ class Game
 
     player.bank -= BET_VALUE
     dealer.bank -= BET_VALUE
-    @@bank += BET_VALUE * 2
+    @bank += BET_VALUE * 2
   end
 
   def player_turn(player, dealer, deck)
-    if player.full_hand? && dealer.full_hand?
+    if player.hand.full? && dealer.hand.full?
       interface.message :three_cards
       winner(player, dealer)
       return
@@ -73,7 +72,7 @@ class Game
   end
 
   def dealer_turn(player, dealer, deck)
-    dealer.take_card(deck) if dealer.current_hand_points < 17 && !dealer.full_hand?
+    dealer.take_card(deck) if dealer.hand.points < 17 && !dealer.hand.full?
     player_turn(player, dealer, deck)
   end
 
@@ -82,31 +81,31 @@ class Game
     interface.open_cards(dealer)
 
     if draw?(player, dealer)
-      player.bank += @@bank / 2
-      dealer.bank += @@bank / 2
+      player.bank += @bank / 2
+      dealer.bank += @bank / 2
       interface.message :draw
     elsif win?(player, dealer)
-      player.bank += @@bank
+      player.bank += @bank
       interface.message :won
     else
-      dealer.bank += @@bank
+      dealer.bank += @bank
       interface.message :lost
     end
     reset(player, dealer)
   end
 
   def draw?(player, dealer)
-    (player.current_hand_points > 21 && dealer.current_hand_points > 21) || (player.current_hand_points == dealer.current_hand_points)
+    (player.hand.points > 21 && dealer.hand.points > 21) || (player.hand.points == dealer.hand.points)
   end
 
   def win?(player, dealer)
-    ((player.current_hand_points > dealer.current_hand_points) && player.current_hand_points <= 21) || (player.current_hand_points <= 21 && dealer.current_hand_points > 21)
+    ((player.hand.points > dealer.hand.points) && player.hand.points <= 21) || (player.hand.points <= 21 && dealer.hand.points > 21)
   end
 
   def reset(player, dealer)
-    @@bank = 0
-    player.clear_hand
-    dealer.clear_hand
+    @bank = 0
+    player.hand.clear
+    dealer.hand.clear
   end
 
   def continue

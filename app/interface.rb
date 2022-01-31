@@ -13,7 +13,11 @@ class Interface
     draw: 'It is draw',
     won: 'You won!',
     lost: 'You lost :(',
-    refresh_deck: 'Deck was refreshed'
+    refresh_deck: 'Deck was refreshed',
+    max_cards: 'You have 3 cards and can\'t get another one',
+    dealer_received: 'Dealer received card [?]',
+    player_received: 'You get card. Your cards is/are:',
+    handing_out: '...Handing out cards to'
   }.freeze
 
   PLAYER_OPTIONS = {
@@ -42,6 +46,14 @@ class Interface
   end
 
   def open_cards(player)
-    puts "#{player.name} has #{player.current_hand.keys} cards, value of cards is #{player.current_hand_points}"
+    puts "#{player.name} has #{player.hand.current_hand.map(&:symbol_n_suit)} cards, value of cards is #{player.hand.points}"
+  end
+
+  def player_card(player)
+    puts "#{MESSAGES[:player_received]} #{player.hand.cards}, value of cards is #{player.hand.points}"
+  end
+
+  def handing_out(player)
+    puts "#{MESSAGES[:handing_out]} #{player.name}"
   end
 end
