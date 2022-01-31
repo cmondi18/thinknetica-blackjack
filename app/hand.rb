@@ -56,29 +56,15 @@ class Hand
 
   attr_writer :current_hand
   attr_reader :interface
-
-  # TODO: maybe there is an easier way?
+  
   def check_aces(sum, aces)
-    # aces[0][0] == 1, aces[0][1] == 11
-    case aces.size
-    when 0
-      sum
-    when 1
+    aces.each do |ace|
       sum +=
-        if sum + aces[0][1] > 21
-          aces[0][0]
+        if sum + ace[1] > 21
+          ace[0]
         else
-          aces[0][1]
+          ace[1]
         end
-    when 2
-      sum +=
-        if sum + aces[0][1] + aces[1][0] > 21
-          aces[0][0] + aces[1][0]
-        else
-          aces[0][1] + aces[1][0]
-        end
-    when 3
-      sum = aces[0][1] + aces[1][0] + aces[2][0] # 13
     end
     sum
   end
