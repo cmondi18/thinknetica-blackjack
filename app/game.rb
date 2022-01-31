@@ -83,25 +83,25 @@ class Game
     open_cards(player)
     open_cards(dealer)
 
-    if player.current_hand_points < dealer.current_hand_points || player.current_hand_points > 21
-      dealer.bank += @@bank
-      @@bank = 0
-      player.clear_hand
-      dealer.clear_hand
-      puts 'You lost :('
-    elsif player.current_hand_points > dealer.current_hand_points
-      player.bank += @@bank
-      @@bank = 0
-      player.clear_hand
-      dealer.clear_hand
-      puts 'You won!'
-    else
+    if (player.current_hand_points > 21 && dealer.current_hand_points > 21) || (player.current_hand_points == dealer.current_hand_points)
       player.bank += @@bank / 2
       dealer.bank += @@bank / 2
       @@bank = 0
       player.clear_hand
       dealer.clear_hand
       puts 'It is draw'
+    elsif (player.current_hand_points > dealer.current_hand_points) || (player.current_hand_points <= 21 && dealer.current_hand_points > 21)
+      player.bank += @@bank
+      @@bank = 0
+      player.clear_hand
+      dealer.clear_hand
+      puts 'You won!'
+    else
+      dealer.bank += @@bank
+      @@bank = 0
+      player.clear_hand
+      dealer.clear_hand
+      puts 'You lost :('
     end
   end
 end

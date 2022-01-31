@@ -28,15 +28,17 @@ class Player
 
   def current_hand_points
     sum = 0
+    aces = []
+    # first iteration to collect sum of the all 'normal' values
     @current_hand.each_value do |value|
-      sum +=
-        if value.is_a?(Array)
-          check_ace(sum, value)
-        else
-          value
-        end
+      if value.is_a?(Array)
+        aces << value
+      else
+        sum += value
+      end
     end
-    sum
+    # then go with aces to check better value
+    check_aces(sum, aces)
   end
 
   def first_take(deck)
@@ -58,10 +60,29 @@ class Player
 
   private
 
-  def check_ace(sum, ace_values)
-    return ace_values.max if sum + ace_values[0] <= 21 && sum + ace_values[1] <= 21
-    return ace_values[0] if sum + ace_values[0] <= 21 && sum + ace_values[1] > 21
-    return ace_values[1] if sum + ace_values[0] > 21 && sum + ace_values[1] <= 21
-    return ace_values.min if sum + ace_values[0] > 21 && sum + ace_values[1] > 21
+  # TODO: maybe there is an easier way?
+  def check_aces(sum, aces)
+    # aces[0][0] == 1, aces[0][1] == 11
+    case aces.size
+    when 0
+      sum
+    when 1
+      sum +=
+        if sum + aces[0][1] > 21
+          aces[0][0]
+        else
+          aces[0][1]
+        end
+    when 2
+      sum +=
+        if sum + aces[0][1] + aces[1][0] > 21
+          aces[0][0] + aces[1][0]
+        else
+          aces[0][1] + aces[1][0]
+        end
+    when 3
+      sum = aces[0][1] + aces[1][0] + aces[2][0] # 13
+    end
+    sum
   end
 end
