@@ -1,6 +1,8 @@
 # frozen_string_literal: true
+
 require_relative 'player'
 require_relative 'deck'
+require_relative 'interface'
 
 # === Game ===
 class Game
@@ -8,16 +10,21 @@ class Game
   BET_VALUE = 10
   @@bank = 0 # TODO: Not sure that really need this var
 
+  def initialize
+    @bank = 0
+    @interface = Interface.new
+  end
+
   def start_game
     dealer = Player.new('Dealer', true)
-    puts 'Say your name, player'
-    name = gets.chomp
+    interface.message :enter_name
+    name = interface.user_input
     player = Player.new(name, false)
-    puts "Game start here, #{player.name}"
+    interface.message :start_game
     deck = Deck.new
     loop do
-      puts "*** \nPlayer bank: #{player.bank}$, Dealer bank: #{dealer.bank}$ \n***"
-      continue(player)
+      interface.balance(player, dealer)
+      continue
       deck = refresh_deck(deck)
       deck.cards
       player.first_take(deck)
@@ -29,9 +36,11 @@ class Game
 
   private
 
+  attr_reader :interface
+
   def get_bets(player, dealer)
     if player.bank < 10 || dealer.bank < 10
-      puts 'Seems like one of the players have balance that is less than 10 dollars, the game is over'
+      interface.message :nil_balance
       exit
     end
 
@@ -42,16 +51,13 @@ class Game
 
   def player_turn(player, dealer, deck)
     if player.full_hand? && dealer.full_hand?
-      puts 'Player and dealer have 3 cards, opening cards'
+      interface.message :three_cards
       winner(player, dealer)
       return
     end
 
-    puts 'What you want to do?'
-    player_options.each do |option|
-      puts option
-    end
-    choice = gets.chomp.to_i
+    interface.what_to_do
+    choice = interface.user_input.to_i
     case choice
     when 1
       dealer_turn(player, dealer, deck)
@@ -61,21 +67,9 @@ class Game
     when 3
       winner(player, dealer)
     else
-      puts 'Wrong option, please try again'
+      interface.message :wrong_option
       player_turn(player, dealer, deck)
     end
-  end
-
-  def player_options
-    [
-      '- Press 1 to skip',
-      '- Press 2 to get another card',
-      '- Press 3 to open cards'
-    ]
-  end
-
-  def open_cards(player)
-    puts "#{player.name} has #{player.current_hand.keys} cards, value of cards is #{player.current_hand_points}"
   end
 
   def dealer_turn(player, dealer, deck)
@@ -84,45 +78,49 @@ class Game
   end
 
   def winner(player, dealer)
-    open_cards(player)
-    open_cards(dealer)
+    interface.open_cards(player)
+    interface.open_cards(dealer)
 
-    if (player.current_hand_points > 21 && dealer.current_hand_points > 21) || (player.current_hand_points == dealer.current_hand_points)
+    if draw?(player, dealer)
       player.bank += @@bank / 2
       dealer.bank += @@bank / 2
-      @@bank = 0
-      player.clear_hand
-      dealer.clear_hand
-      puts 'It is draw'
-    elsif ((player.current_hand_points > dealer.current_hand_points) && player.current_hand_points <= 21) || (player.current_hand_points <= 21 && dealer.current_hand_points > 21)
+      interface.message :draw
+    elsif win?(player, dealer)
       player.bank += @@bank
-      @@bank = 0
-      player.clear_hand
-      dealer.clear_hand
-      puts 'You won!'
+      interface.message :won
     else
       dealer.bank += @@bank
-      @@bank = 0
-      player.clear_hand
-      dealer.clear_hand
-      puts 'You lost :('
+      interface.message :lost
     end
+    reset(player, dealer)
   end
 
-  def continue(player)
-    puts "#{player.name}, do you want to continue? Press '1' if yes, another button if no"
-    choice = gets.chomp.to_i
-    if choice == 1
-      return
-    else
-      puts 'Thanks for game, goodbye'
-      exit
-    end
+  def draw?(player, dealer)
+    (player.current_hand_points > 21 && dealer.current_hand_points > 21) || (player.current_hand_points == dealer.current_hand_points)
+  end
+
+  def win?(player, dealer)
+    ((player.current_hand_points > dealer.current_hand_points) && player.current_hand_points <= 21) || (player.current_hand_points <= 21 && dealer.current_hand_points > 21)
+  end
+
+  def reset(player, dealer)
+    @@bank = 0
+    player.clear_hand
+    dealer.clear_hand
+  end
+
+  def continue
+    interface.message :continue
+    choice = interface.user_input.to_i
+    return nil if choice == 1
+
+    interface.message :thx_for_game
+    exit
   end
 
   def refresh_deck(deck)
     if deck.cards.size < MIN_DECK_SIZE
-      puts 'Deck was refreshed'
+      interface.message :refresh_deck
       Deck.new
     else
       deck
